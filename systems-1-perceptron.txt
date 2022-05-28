@@ -1,129 +1,179 @@
-JMP main
+MP main
 
-radius: DW 40
-cpos_y:  DW 10
-cpos_x:  DW 10
-pos_y: 	DW 10
-pos_x: 	DW 10
-i:		DW 0
-j: 		DW 0
+WIDTH: DW 20
+HEIGHT: DW 20
+SCALER: DW 11
 
+radius: DW 5
+mradius: DW 0
+
+mpos_x: DW 0
+mpos_y: DW 0
+
+temp_pos: DW 0
+
+cpos_y:  DW 1
+cpos_x:  DW 1
+
+pos_y: 	DW 1
+pos_x: 	DW 1
+
+i: DW 0
+j: DW 0
+
+; -----------------------------------------------------------------------
+; function scale()
+; -----------------------------------------------------------------------
+scale:
+    MOV A , [radius]
+    MUL [SCALER]
+    MOV [mradius] , A
+    
+    MOV A , [pos_x]
+    MUL [SCALER]
+    MOV [mpos_x] , A
+    
+    MOV A , [pos_y]
+    MUL [SCALER]
+    MOV [mpos_y] , A
+    
+    MOV A , [cpos_x]
+    MUL [SCALER]
+    MOV [cpos_x] , A
+    
+    MOV A , [cpos_y]
+    MUL [SCALER]
+    MOV [cpos_y] , A
+    
+    RET
 ; -----------------------------------------------------------------------
 ; function draw_circle_segment()
 ; -----------------------------------------------------------------------
 draw_circle_segment:
-	MOV A , [j]
-	CMP A , [radius]
+    MOV A , [j]
+    CMP A , [mradius]
     JA draw_circle_segment_return
-    MOV B , [pos_y]
+    MOV A , [mpos_x]
+    MUL [mpos_x]
+    MOV B , A
+    MOV A , [mpos_y]
+    MUL [mpos_y]
+    ADD B , A ; B = x*x + y*y
+    MOV A , [mradius]
+    MUL [mradius] ; A = r*r
+    CMP B , A ; if (x*x + y*y <= r*r)
+    JA skip_circle_segment
+    MOV B , [mpos_y]
     MOVB AH , BL
-    MOV B , [pos_x]
+    MOV B , [mpos_x]
     MOVB AL , BL
     OUT 8
     MOV A , 255
     OUT 9
-    MOV A , [pos_x]
+    MOV A , [mpos_x]
     INC A
-    MOV [pos_x] , A
+    MOV [mpos_x] , A
+skip_circle_segment:
     MOV A , [j]
     INC A
     MOV [j] , A
     JMP draw_circle_segment
 draw_circle_segment_return:
-	MOV [j] , 0
-	RET
+    MOV [j] , 0
+    RET
 
 ; -----------------------------------------------------------------------
 ; function draw_circle()
 ; -----------------------------------------------------------------------
 draw_circle:
-	MOV A , 2
+    MOV A , 2
     OUT 7
     MOV A , 3
     OUT 7
 draw_circle_loop:
-	MOV A , [i]
-	CMP A , [radius]
+    MOV A , [i]
+    CMP A , [mradius]
     JA draw_circle_end_loop
     MOV A , [cpos_y]
-    MOV [pos_x] , A
+    MOV [mpos_x] , A
     CALL draw_circle_segment
-    MOV A , [pos_y]
+    MOV A , [mpos_y]
     INC A
-    MOV [pos_y] , A
+    MOV [mpos_y] , A
     MOV A , [i]
     INC A
     MOV [i] , A
     JMP draw_circle_loop
 draw_circle_end_loop:
-	MOV [i] , 0
-	RET
+    MOV [i] , 0
+    RET
 
 ; -----------------------------------------------------------------------
 ; function draw_line_segment()
 ; -----------------------------------------------------------------------
 draw_line_segment:
-	MOV A , [j]
-	CMP A , [radius]
+    MOV A , [j]
+    CMP A , [mradius]
     JA draw_line_segment_return
-    MOV B , [pos_y]
+    MOV B , [mpos_y]
     MOVB AH , BL
-    MOV B , [pos_x]
+    MOV B , [mpos_x]
     MOVB AL , BL
     OUT 8
     MOV A , 255
     OUT 9
-    MOV A , [pos_x]
+    MOV A , [mpos_x]
     INC A
-    MOV [pos_x] , A
+    MOV [mpos_x] , A
     MOV A , [j]
     INC A
     MOV [j] , A
     JMP draw_line_segment
 draw_line_segment_return:
-	MOV [j] , 0
-	RET
+    MOV [j] , 0
+    RET
 
 ; -----------------------------------------------------------------------
 ; function draw_rect()
 ; -----------------------------------------------------------------------
 draw_rect:
-	MOV A , 2
+    MOV A , 2
     OUT 7
     MOV A , 3
     OUT 7
 draw_rect_loop:
-	MOV A , [i]
-	CMP A , [radius]
+    MOV A , [i]
+    CMP A , [mradius]
     JA draw_rect_end_loop
     MOV A , [cpos_y]
-    MOV [pos_x] , A
+    MOV [mpos_x] , A
     CALL draw_line_segment
-    MOV A , [pos_y]
+    MOV A , [mpos_y]
     INC A
-    MOV [pos_y] , A
+    MOV [mpos_y] , A
     MOV A , [i]
     INC A
     MOV [i] , A
     JMP draw_rect_loop
 draw_rect_end_loop:
-	MOV [i] , 0
-	RET
+    MOV [i] , 0
+    RET
     
 ; -----------------------------------------------------------------------
 ; function init()
 ; ----------------------------------------------------------------------- 
 ; SCREEN SIZE: 255 x 255
-; RANDOM RANGE: 255 - RADIUS
-; 
+; PERCEPTRON RESOLUTION: 20 x 20
+; SCALED RESOLUTION 220 x 220
 ;
 init:
-	IN 10
+    IN 10
     MOV C , A
     RET
 
 main:
-	MOV SP , 0x0FFF
+    MOV SP , 0x0FFF
     CALL init
-	CALL draw_rect
-	HLT
+    CALL scale
+    CALL draw_circle
+    HLT
