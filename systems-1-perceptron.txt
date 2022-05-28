@@ -5,14 +5,14 @@ JMP main
 ; -----------------------------------------------------------------------
 ; USER INPUT
 ; SHAPE: 0 --> rect | 1 --> circle
-SHAPE: DW 0
+SHAPE: DW 1
 HEIGHT: DW 20
 WIDTH: 	DW 20
 ; BIAS was chosen during perceptron 
 ; training and should be respected
 BIAS: DW 5
 diameter: DW 2
-rwidth: DW 15
+rwidth: DW 10
 rheight: DW 15
 pos_x: DW 1
 pos_y: DW 1
@@ -442,6 +442,8 @@ main:
     MOV A , [SHAPE]
     CMP A , 0
     JE shape_rect
+    JNE shape_circle
+    
 shape_rect:
 	CALL draw_rect
     JMP continue
