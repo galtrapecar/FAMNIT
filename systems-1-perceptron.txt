@@ -1,5 +1,7 @@
 JMP main
 
+; USER INPUT
+
 HEIGHT: DW 20
 WIDTH: 	DW 20
 ; BIAS was chosen during perceptron 
@@ -17,7 +19,7 @@ INPUTS: DB "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
 input_index: DW 0
 input_value: DW 0
 
-diameter: DW 1
+diameter: DW 2
 
 center_x: DW 0
 center_y: DW 0
@@ -28,59 +30,42 @@ cpos_x:  DW 0
 dpos_y: DW 0
 dpos_x: DW 0
 
-pos_x: DW 2
-pos_y: DW 2
+pos_x: DW 10
+pos_y: DW 10
 
 i: DW 0
 j: DW 0
 
 output: DW 0
-rect_s: 	DB "RECTANGLE"
-		 	DB 0
-circle_s: 	DB "CIRCLE"
-		 	DB 0
-            
+mode: DW 1
+
 ; -----------------------------------------------------------------------
-; function draw_rect_text()
+; function draw_rect_final()
 ; -----------------------------------------------------------------------
-draw_rect_text:
-	MOV A , 1
-    OUT 7
-    MOV C , rect_s
-    MOV D , 0
-rect_loop:
-	MOV A , D
-    OUT 8
-    MOVB AH , [C]
-    CMPB AH , 0
-    JE endr
-    MOVB AL , 252
-    OUT 9 
-    INC C
-    ADD D , 2
-    JMP rect_loop
-endr:
+draw_rect_final:
+	MOV [pos_x] , 127
+    MOV [pos_y] , 127
+    MOV [i] , 0
+    MOV [j] , 0
+    MOV [cpos_x] , 127
+    MOV [cpos_y] , 127
+    MOV [diameter] , 40
+    MOV [mode] , 0
+	CALL draw_rect
 	RET
 ; -----------------------------------------------------------------------
-; function draw_circle_text()
+; function draw_circle_final()
 ; -----------------------------------------------------------------------
-draw_circle_text:
-	MOV A , 1
-    OUT 7
-    MOV C , circle_s
-    MOV D , 0
-circle_loop:
-	MOV A , D
-    OUT 8
-    MOVB AH , [C]
-    CMPB AH , 0
-    JE endc
-    MOVB AL , 252
-    OUT 9 
-    INC C
-    ADD D , 2
-    JMP circle_loop
-endc:
+draw_circle_final:
+	MOV [pos_x] , 127
+    MOV [pos_y] , 127
+    MOV [i] , 0
+    MOV [j] , 0
+    MOV [cpos_x] , 127
+    MOV [cpos_y] , 127
+    MOV [diameter] , 40
+    MOV [mode] , 0
+	CALL draw_circle
 	RET
 ; -----------------------------------------------------------------------
 ; function display_output()
@@ -102,11 +87,11 @@ test_complement_r:
     JNA output_circle
 
 output_circle:
-	CALL draw_circle_text
+	CALL draw_circle_final
 	RET
     
 output_rectangle:
-	CALL draw_rect_text
+	CALL draw_rect_final
 	RET
 ; -----------------------------------------------------------------------
 ; function get_weight_from_index()
@@ -302,12 +287,15 @@ draw_circle_segment:
     MOV A , 255
     OUT 9
     
+	MOV A , [mode]
+    CMP A , 0
+    JE skip_circle_pixel
     CALL calculate_input_index
     MOV [input_index] , A
     MOV A , 1
     MOV [input_value] , A
     CALL modify_input_at_index
-    
+
 skip_circle_pixel:
     MOV A , [pos_x] ; x++
     INC A
@@ -377,12 +365,15 @@ draw_line_segment:
     MOV A , 255
     OUT 9
     
+    MOV A , [mode]
+    CMP A , 0
+    JE skip_line
     CALL calculate_input_index
     MOV [input_index] , A
     MOV A , 1
     MOV [input_value] , A
     CALL modify_input_at_index
-    
+skip_line:
     MOV A , [pos_x]
     INC A
     MOV [pos_x] , A
@@ -441,9 +432,9 @@ init:
     RET
 
 main:
-	MOV SP , 0x0FFF
+	MOV SP , 0x09FF
     CALL init
-	CALL draw_circle
+	CALL draw_rect
     MOV [i] , 0
     MOV [j] , 0
     MOV [input_index] , 0
