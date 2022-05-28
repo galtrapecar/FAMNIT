@@ -2,7 +2,6 @@ JMP main
 
 HEIGHT: DW 20
 WIDTH: 	DW 20
-SCALER: DW 11
 
 ; FRAME OF REFRERNCE: 
 ; Zero coordinate is moved to positive 30 to
@@ -16,24 +15,98 @@ INPUTS: DB "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
 input_index: DW 0
 input_value: DW 0
 
-diameter: DW 5
-mdiameter: DW 0
+diameter: DW 10
 
 center_x: DW 0
 center_y: DW 0
 
-mpos_x: DW 0
-mpos_y: DW 0
-
 cpos_y:  DW 0
 cpos_x:  DW 0
 
-pos_x: DW 7
-pos_y: DW 7
+dpos_y: DW 0
+dpos_x: DW 0
+
+pos_x: DW 2
+pos_y: DW 2
 
 i: DW 0
 j: DW 0
 
+; -----------------------------------------------------------------------
+; function get_input_from_index()
+; -----------------------------------------------------------------------
+get_input_from_index:
+	MOV B , INPUTS ; input address
+    MOV A , [input_index]
+    MUL 2
+    ADD A , B
+    MOV B , [A]
+    MOV A , B
+    RET
+; -----------------------------------------------------------------------
+; function draw_line_from_inputs()
+; -----------------------------------------------------------------------
+draw_line_from_inputs:
+	MOV A , [dpos_x]
+    CMP A , [WIDTH]
+    JAE draw_line_from_inputs_return
+    
+    CALL get_input_from_index ; A = value at index
+    CMP A , 0
+    JNE skip_line_pixel
+    
+   	MOV B , [dpos_y]
+    MOVB AH , BL
+    MOV B , [dpos_x]
+    MOVB AL, BL
+    OUT 8
+    MOV A , 60
+    OUT 9
+    
+skip_line_pixel:
+	MOV A , [input_index] ; input_index++
+    INC A
+    MOV [input_index] , A
+    
+    MOV A , [dpos_x] ; j++
+    INC A
+    MOV [dpos_x] , A
+    
+	JMP draw_line_from_inputs
+draw_line_from_inputs_return:
+	RET
+; -----------------------------------------------------------------------
+; function draw_from_inputs()
+; -----------------------------------------------------------------------
+draw_from_inputs:
+	MOV A , [dpos_y]
+    CMP A , [HEIGHT]
+    JAE draw_from_inputs_return
+    
+    CALL draw_line_from_inputs
+    
+    MOV A , [dpos_y] ; i++
+    INC A
+    MOV [dpos_y] , A
+    
+    MOV [dpos_x] , 0
+    
+    JMP draw_from_inputs
+draw_from_inputs_return:
+	RET
+; -----------------------------------------------------------------------
+; function calculate_input_index()
+; function maps matrix to 1D array indicies in row-major order:
+; index = i * m + j
+;
+; index = pos_y * WIDTH + pos_x
+; -----------------------------------------------------------------------
+calculate_input_index:
+	MOV A , [pos_y]
+    MUL [WIDTH]
+    MOV B , [pos_x]
+    ADD A , B
+	RET
 ; -----------------------------------------------------------------------
 ; function modify_input_at_index()
 ; -----------------------------------------------------------------------
@@ -57,34 +130,17 @@ get_weight_from_index:
     MOV A , B
     RET
 ; -----------------------------------------------------------------------
-; function scale()
-; -----------------------------------------------------------------------
-scale:
-	MOV A , [pos_x]
-    MUL [SCALER]
-    MOV [mpos_x] , A
-    
-    MOV A , [pos_y]
-    MUL [SCALER]
-    MOV [mpos_y] , A
-    
-    MOV A , [diameter]
-    MUL [SCALER]
-    MOV [mdiameter] , A
-    
-	RET 
-; -----------------------------------------------------------------------
 ; function calculate_center()
 ; -----------------------------------------------------------------------
 calculate_center:
 	MOV B , [cpos_x]
-    MOV A , [mdiameter]
+    MOV A , [diameter]
     DIV 2
     ADD A , B
     MOV [center_x] , A
     
     MOV B , [cpos_y]
-    MOV A , [mdiameter]
+    MOV A , [diameter]
     DIV 2
     ADD A , B
     MOV [center_y] , A
@@ -94,42 +150,45 @@ calculate_center:
 ; -----------------------------------------------------------------------
 draw_circle_segment:
 	MOV A , [j]
-    CMP A , [mdiameter] ; j < mdiameter
+    CMP A , [diameter] ; j < mdiameter
     JA draw_circle_segment_return
     
-    MOV A , [mpos_x] ; (x1 - x2) * (x1 - x2)
+    MOV A , [pos_x] ; (x1 - x2) * (x1 - x2)
     SUB A , [center_x] ; cpos_x + radius
     MUL A
     MOV B , A ; B = result
     
-    MOV A , [mpos_y] ; (y1 - y2) * (y1 - y2)
+    MOV A , [pos_y] ; (y1 - y2) * (y1 - y2)
     SUB A , [center_y]
     MUL A
     
     ADD B , A ; B = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     
-    MOV A , [mdiameter] ; A = radius * radius
+    MOV A , [diameter] ; A = radius * radius
     DIV 2
     MUL A
     
     CMP B , A
     JA skip_circle_pixel
 
-    MOV B , [mpos_y]
+    MOV B , [pos_y]
     MOVB AH , BL
-    MOV B , [mpos_x]
+    MOV B , [pos_x]
     MOVB AL, BL
     OUT 8
     MOV A , 255
     OUT 9
     
-    MOV [input_index] , 
+    CALL calculate_input_index
+    MOV [input_index] , A
+    MOV A , 1
+    MOV [input_value] , A
     CALL modify_input_at_index
     
 skip_circle_pixel:
-    MOV A , [mpos_x] ; x++
+    MOV A , [pos_x] ; x++
     INC A
-    MOV [mpos_x] , A
+    MOV [pos_x] , A
     
     MOV A , [j]
     INC A
@@ -149,27 +208,27 @@ draw_circle:
     OUT 7
 draw_circle_loop:
 	MOV A , [i]
-	CMP A , [mdiameter] ; i < mdiameter
+	CMP A , [diameter] ; i < mdiameter
     JA draw_circle_end_loop 
     
     CALL draw_circle_segment
-    MOV A , [mpos_y]
+    MOV A , [pos_y]
     INC A
-    MOV [mpos_y] , A
+    MOV [pos_y] , A
     
     ; TEMP
-    ;MOV B , [mpos_y]
-    ;MOVB AH , BL
-    ;MOV B , [cpos_x]
-    ;MOVB AL, BL
-    ;OUT 8
-    ;MOV A , 255
-    ;OUT 9
+    MOV B , [pos_y]
+    MOVB AH , BL
+    MOV B , [cpos_x]
+    MOVB AL, BL
+    OUT 8
+    MOV A , 255
+    OUT 9
     
     MOV [j] , 0 ; j = 0
     
     MOV A , [cpos_x]
-    MOV [mpos_x] , A ; x = constant x
+    MOV [pos_x] , A ; x = constant x
     
     MOV A , [i] ; i++
     INC A
@@ -184,18 +243,18 @@ draw_circle_end_loop:
 ; -----------------------------------------------------------------------
 draw_line_segment:
 	MOV A , [j]
-	CMP A , [mdiameter]
+	CMP A , [diameter]
     JA draw_line_segment_return
-    MOV B , [mpos_y]
+    MOV B , [pos_y]
     MOVB AH , BL
-    MOV B , [mpos_x]
+    MOV B , [pos_x]
     MOVB AL , BL
     OUT 8
     MOV A , 255
     OUT 9
-    MOV A , [mpos_x]
+    MOV A , [pos_x]
     INC A
-    MOV [mpos_x] , A
+    MOV [pos_x] , A
     MOV A , [j]
     INC A
     MOV [j] , A
@@ -214,14 +273,14 @@ draw_rect:
     OUT 7
 draw_rect_loop:
 	MOV A , [i]
-	CMP A , [mdiameter]
+	CMP A , [diameter]
     JA draw_rect_end_loop
     MOV A , [cpos_y]
-    MOV [mpos_x] , A
+    MOV [pos_x] , A
     CALL draw_line_segment
-    MOV A , [mpos_y]
+    MOV A , [pos_y]
     INC A
-    MOV [mpos_y] , A
+    MOV [pos_y] , A
     MOV A , [i]
     INC A
     MOV [i] , A
@@ -238,10 +297,9 @@ draw_rect_end_loop:
 ; SCALED RESOLUTION 220 x 220
 ; 
 init:
-	CALL scale
-	MOV A , [mpos_x]
+	MOV A , [pos_x]
     MOV [cpos_x] , A
-    MOV A , [mpos_y]
+    MOV A , [pos_y]
     MOV [cpos_y] , A
     RET
 
@@ -249,5 +307,8 @@ main:
 	MOV SP , 0x0FFF
     CALL init
 	CALL draw_circle
-    CALL get_weight_from_index
+    MOV [i] , 0
+    MOV [j] , 0
+    MOV [input_index] , 0
+    CALL draw_from_inputs
 	HLT
