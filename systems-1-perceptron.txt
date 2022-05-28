@@ -2,12 +2,14 @@ JMP main
 
 HEIGHT: DW 20
 WIDTH: 	DW 20
+; BIAS was chosen during perceptron 
+; training and should be respected
+BIAS: DW 10
 
 ; FRAME OF REFRERNCE: 
 ; Zero coordinate is moved to positive 30 to
 ; convert all negative values of trained model
 ; matrix to positive 
-
 WEIGHTS: DB "\x00\x20\x00\x41\x00\x37\x00\x25\x00\x39\x00\x32\x00\x34\x00\x42\x00\x49\x00\x10\x00\x38\x00\x30\x00\x39\x00\x35\x00\x28\x00\x38\x00\x29\x00\x37\x00\x25\x00\x40\x00\x43\x00\x32\x00\x29\x00\x29\x00\x38\x00\x31\x00\x31\x00\x12\x00\x28\x00\x36\x00\x31\x00\x22\x00\x39\x00\x28\x00\x21\x00\x35\x00\x27\x00\x40\x00\x26\x00\x41\x00\x37\x00\x21\x00\x33\x00\x33\x00\x23\x00\x31\x00\x30\x00\x53\x00\x33\x00\x22\x00\x22\x00\x31\x00\x26\x00\x30\x00\x32\x00\x27\x00\x31\x00\x31\x00\x32\x00\x40\x00\x33\x00\x37\x00\x41\x00\x29\x00\x30\x00\x38\x00\x26\x00\x36\x00\x27\x00\x33\x00\x34\x00\x27\x00\x32\x00\x31\x00\x39\x00\x24\x00\x28\x00\x33\x00\x33\x00\x42\x00\x26\x00\x32\x00\x27\x00\x36\x00\x25\x00\x27\x00\x26\x00\x34\x00\x38\x00\x37\x00\x27\x00\x31\x00\x27\x00\x39\x00\x35\x00\x33\x00\x33\x00\x29\x00\x29\x00\x41\x00\x38\x00\x38\x00\x28\x00\x41\x00\x26\x00\x22\x00\x39\x00\x31\x00\x29\x00\x21\x00\x34\x00\x36\x00\x34\x00\x27\x00\x27\x00\x33\x00\x32\x00\x39\x00\x34\x00\x43\x00\x28\x00\x24\x00\x34\x00\x29\x00\x31\x00\x27\x00\x36\x00\x22\x00\x34\x00\x43\x00\x32\x00\x25\x00\x32\x00\x35\x00\x31\x00\x36\x00\x28\x00\x36\x00\x34\x00\x41\x00\x38\x00\x32\x00\x39\x00\x26\x00\x36\x00\x22\x00\x31\x00\x30\x00\x34\x00\x26\x00\x24\x00\x34\x00\x30\x00\x21\x00\x26\x00\x32\x00\x37\x00\x35\x00\x32\x00\x40\x00\x20\x00\x32\x00\x28\x00\x28\x00\x33\x00\x23\x00\x38\x00\x24\x00\x29\x00\x35\x00\x26\x00\x32\x00\x23\x00\x40\x00\x25\x00\x30\x00\x27\x00\x30\x00\x30\x00\x41\x00\x41\x00\x00\x00\x31\x00\x31\x00\x32\x00\x26\x00\x20\x00\x33\x00\x28\x00\x21\x00\x42\x00\x28\x00\x28\x00\x31\x00\x27\x00\x28\x00\x36\x00\x33\x00\x29\x00\x41\x00\x34\x00\x24\x00\x33\x00\x31\x00\x32\x00\x35\x00\x33\x00\x38\x00\x29\x00\x29\x00\x22\x00\x33\x00\x41\x00\x18\x00\x31\x00\x26\x00\x28\x00\x32\x00\x30\x00\x44\x00\x36\x00\x38\x00\x35\x00\x30\x00\x39\x00\x19\x00\x32\x00\x27\x00\x35\x00\x35\x00\x28\x00\x21\x00\x30\x00\x33\x00\x32\x00\x32\x00\x32\x00\x32\x00\x28\x00\x43\x00\x26\x00\x33\x00\x28\x00\x25\x00\x35\x00\x40\x00\x28\x00\x24\x00\x32\x00\x27\x00\x25\x00\x32\x00\x34\x00\x28\x00\x28\x00\x26\x00\x31\x00\x34\x00\x32\x00\x40\x00\x41\x00\x26\x00\x23\x00\x26\x00\x26\x00\x32\x00\x22\x00\x29\x00\x27\x00\x31\x00\x32\x00\x26\x00\x24\x00\x26\x00\x30\x00\x32\x00\x29\x00\x29\x00\x32\x00\x40\x00\x37\x00\x42\x00\x31\x00\x32\x00\x35\x00\x28\x00\x30\x00\x30\x00\x36\x00\x18\x00\x30\x00\x30\x00\x29\x00\x26\x00\x29\x00\x35\x00\x30\x00\x29\x00\x34\x00\x40\x00\x08\x00\x29\x00\x23\x00\x36\x00\x40\x00\x28\x00\x31\x00\x30\x00\x34\x00\x35\x00\x21\x00\x37\x00\x26\x00\x25\x00\x34\x00\x28\x00\x32\x00\x33\x00\x25\x00\x42\x00\x44\x00\x25\x00\x35\x00\x22\x00\x21\x00\x30\x00\x34\x00\x36\x00\x15\x00\x33\x00\x30\x00\x27\x00\x35\x00\x24\x00\x34\x00\x31\x00\x30\x00\x35\x00\x30\x00\x42\x00\x43\x00\x03\x00\x41\x00\x35\x00\x20\x00\x30\x00\x32\x00\x37\x00\x30\x00\x27\x00\x36\x00\x25\x00\x30\x00\x34\x00\x35\x00\x34\x00\x26\x00\x27\x00\x31\x00\x42\x00\x34\x00\x43\x00\x26\x00\x24\x00\x34\x00\x34\x00\x25\x00\x31\x00\x27\x00\x36\x00\x38\x00\x17\x00\x25\x00\x43\x00\x30\x00\x28\x00\x31\x00\x26\x00\x29\x00\x40\x00\x10\x00\x49\x00\x18\x00\x24\x00\x20\x00\x32\x00\x32\x00\x07\x00\x30\x00\x31\x00\x22\x00\x25\x00\x29\x00\x16\x00\x25\x00\x32\x00\x35\x00\x29\x00\x33\x00\x40"
 weight_index: DW 0
 
@@ -15,7 +17,7 @@ INPUTS: DB "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
 input_index: DW 0
 input_value: DW 0
 
-diameter: DW 10
+diameter: DW 1
 
 center_x: DW 0
 center_y: DW 0
@@ -32,6 +34,91 @@ pos_y: DW 2
 i: DW 0
 j: DW 0
 
+output: DW 0
+rect_s: 	DB "RECTANGLE"
+		 	DB 0
+circle_s: 	DB "CIRCLE"
+		 	DB 0
+            
+; -----------------------------------------------------------------------
+; function draw_rect_text()
+; -----------------------------------------------------------------------
+draw_rect_text:
+	MOV A , 1
+    OUT 7
+    MOV C , rect_s
+    MOV D , 0
+rect_loop:
+	MOV A , D
+    OUT 8
+    MOVB AH , [C]
+    CMPB AH , 0
+    JE endr
+    MOVB AL , 252
+    OUT 9 
+    INC C
+    ADD D , 2
+    JMP rect_loop
+endr:
+	RET
+; -----------------------------------------------------------------------
+; function draw_circle_text()
+; -----------------------------------------------------------------------
+draw_circle_text:
+	MOV A , 1
+    OUT 7
+    MOV C , circle_s
+    MOV D , 0
+circle_loop:
+	MOV A , D
+    OUT 8
+    MOVB AH , [C]
+    CMPB AH , 0
+    JE endc
+    MOVB AL , 252
+    OUT 9 
+    INC C
+    ADD D , 2
+    JMP circle_loop
+endc:
+	RET
+; -----------------------------------------------------------------------
+; function display_output()
+; adjustment for frame of reference change 0 -> 30
+; -----------------------------------------------------------------------
+display_output:
+	MOV A , [output]
+    DIV 10
+    SUB A , 30
+    MOV [output] , A
+    
+    CMP A , [BIAS] ; A > BIAS --> RECTANGLE
+	JA test_complement_r
+    JNA output_circle
+    
+test_complement_r:
+	CMP A , 0xf800 ; A > -2040 two's complement
+    JA output_rectangle
+    JNA output_circle
+
+output_circle:
+	CALL draw_circle_text
+	RET
+    
+output_rectangle:
+	CALL draw_rect_text
+	RET
+; -----------------------------------------------------------------------
+; function get_weight_from_index()
+; -----------------------------------------------------------------------
+get_weight_from_index:
+	MOV B , WEIGHTS ; weights address
+    MOV A , [weight_index]
+    MUL 2
+    ADD A , B
+    MOV B , [A]
+    MOV A , B
+    RET
 ; -----------------------------------------------------------------------
 ; function get_input_from_index()
 ; -----------------------------------------------------------------------
@@ -44,6 +131,53 @@ get_input_from_index:
     MOV A , B
     RET
 ; -----------------------------------------------------------------------
+; function feed_forward_loop()
+; output += inputs * weights
+; -----------------------------------------------------------------------
+feed_forward_loop:
+	MOV A , [i]
+    CMP A , [j]
+    JAE feed_forward_loop_return
+    
+    MOV A , [i]
+    MOV [input_index] , A
+    CALL get_input_from_index
+    MOV C , A ; C = input
+    
+    MOV A , [i]
+    MOV [weight_index] , A
+    CALL get_weight_from_index
+    MOV D , A ; D = weight
+    
+    MOV A , C
+    MUL D ; A = inputs * weights
+    
+  	MOV B , [output]
+    ADD A , B
+    
+    MOV [output] , A
+    
+    MOV A , [i] ; i++
+    INC A
+    MOV [i] , A
+
+	JMP feed_forward_loop
+feed_forward_loop_return:
+	RET
+; -----------------------------------------------------------------------
+; function feed_forward()
+; -----------------------------------------------------------------------
+feed_forward:
+	MOV A , [WIDTH]
+    MUL [HEIGHT]
+	MOV [j] , A
+    MOV [i] , 0
+    
+    CALL feed_forward_loop
+    CALL display_output
+    
+	RET
+; -----------------------------------------------------------------------
 ; function draw_line_from_inputs()
 ; -----------------------------------------------------------------------
 draw_line_from_inputs:
@@ -53,7 +187,7 @@ draw_line_from_inputs:
     
     CALL get_input_from_index ; A = value at index
     CMP A , 0
-    JNE skip_line_pixel
+    JE skip_line_pixel
     
    	MOV B , [dpos_y]
     MOVB AH , BL
@@ -118,17 +252,6 @@ modify_input_at_index:
     MOV C , [input_value]
     MOV [A] , C
 	RET
-; -----------------------------------------------------------------------
-; function get_weight_from_index()
-; -----------------------------------------------------------------------
-get_weight_from_index:
-	MOV B , WEIGHTS ; weights address
-    MOV A , [weight_index]
-    MUL 2
-    ADD A , B
-    MOV B , [A]
-    MOV A , B
-    RET
 ; -----------------------------------------------------------------------
 ; function calculate_center()
 ; -----------------------------------------------------------------------
@@ -217,13 +340,13 @@ draw_circle_loop:
     MOV [pos_y] , A
     
     ; TEMP
-    MOV B , [pos_y]
-    MOVB AH , BL
-    MOV B , [cpos_x]
-    MOVB AL, BL
-    OUT 8
-    MOV A , 255
-    OUT 9
+    ;MOV B , [pos_y]
+    ;MOVB AH , BL
+    ;MOV B , [cpos_x]
+    ;MOVB AL, BL
+    ;OUT 8
+    ;MOV A , 255
+    ;OUT 9
     
     MOV [j] , 0 ; j = 0
     
@@ -245,6 +368,7 @@ draw_line_segment:
 	MOV A , [j]
 	CMP A , [diameter]
     JA draw_line_segment_return
+    
     MOV B , [pos_y]
     MOVB AH , BL
     MOV B , [pos_x]
@@ -252,12 +376,21 @@ draw_line_segment:
     OUT 8
     MOV A , 255
     OUT 9
+    
+    CALL calculate_input_index
+    MOV [input_index] , A
+    MOV A , 1
+    MOV [input_value] , A
+    CALL modify_input_at_index
+    
     MOV A , [pos_x]
     INC A
     MOV [pos_x] , A
+    
     MOV A , [j]
     INC A
     MOV [j] , A
+    
     JMP draw_line_segment
 draw_line_segment_return:
 	MOV [j] , 0
@@ -275,15 +408,19 @@ draw_rect_loop:
 	MOV A , [i]
 	CMP A , [diameter]
     JA draw_rect_end_loop
+    
     MOV A , [cpos_y]
     MOV [pos_x] , A
     CALL draw_line_segment
+    
     MOV A , [pos_y]
     INC A
     MOV [pos_y] , A
+    
     MOV A , [i]
     INC A
     MOV [i] , A
+    
     JMP draw_rect_loop
 draw_rect_end_loop:
 	MOV [i] , 0
@@ -311,4 +448,5 @@ main:
     MOV [j] , 0
     MOV [input_index] , 0
     CALL draw_from_inputs
+    CALL feed_forward
 	HLT
