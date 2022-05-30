@@ -1,25 +1,46 @@
 JMP main
 ; -----------------------------------------------------------------------
-; SCREEN SIZE: 255 x 255
-; PERCEPTRON RESOLUTION: 30 x 30
+; Perceptron Mark I implementation in 16-bit Assembly
+; 
+; This is a naive implementation of machine learning algorithm by Frank Rosenblatt.
+; The Perceptron training process was done in C.
+; Trained model was parsed with JavaScript into Assembly bytes notation.
+; 
+; Perceptron is supposed to destinguish between primitive shapes (circle, rectangle).
+; 
+; Calculated fail rate is 0.3941 which indicates more than luck-based efficiency.
+; 
+; The algorithm is not perfect. It's reliability scales with resolution.
+; Minimum resolution for algorithm convergance is 45 x 45 pixels.
+; Resolution of 20 x 20 pixels was chosen based on CPU memmory limitations.
+; 
+; Inspired by:
+;  - Alexey Kutepov (alias Tsoding) : https://github.com/tsoding/perceptron
+;  - Veritasium video : https://www.youtube.com/watch?v=GVsUOuSjvcg
 ; -----------------------------------------------------------------------
-; USER INPUT
+; SCREEN SIZE: 255 x 255
+; PERCEPTRON RESOLUTION: 20 x 20
+; -----------------------------------------------------------------------
+; USER CHOSEN VARIABLES
+;
+; Please respect resolution size. 
+; Attempting to draw shapes outside bounding resolution will break Perceptron.
+;
 ; SHAPE: 0 --> rect | 1 --> circle
-SHAPE: DW 1
+SHAPE: DW 0
 HEIGHT: DW 20
 WIDTH: 	DW 20
-; BIAS was chosen during perceptron 
-; training and should be respected
-BIAS: DW 5
-diameter: DW 2
-rwidth: DW 10
-rheight: DW 15
-pos_x: DW 1
-pos_y: DW 1
+; BIAS was chosen during Perceptron training and should be respected.
+BIAS: DW 400
+diameter: DW 5
+rwidth: DW 5
+rheight: DW 5
+pos_x: DW 0
+pos_y: DW 0
 ; -----------------------------------------------------------------------
 
 ; FRAME OF REFRERNCE: 
-; Zero coordinate is moved to positive 30 to
+; Zero coordinate is moved to positive 200 to
 ; convert all negative values of trained model
 ; matrix to positive
 WEIGHTS: DB "\x00\xB1\x00\xE2\x00\xC2\x00\xC6\x00\xD7\x00\xCA\x00\xC0\x00\xC4\x00\xCA\x00\xC7\x00\xCF\x00\xD3\x00\xBE\x00\xCB\x00\xCA\x00\xC6\x00\xCB\x00\xCD\x00\xC6\x00\xCD\x00\xCD\x00\xD8\x00\xBE\x00\xCE\x00\xBB\x00\xC8\x00\xE1\x00\xBC\x00\xD4\x00\xCC\x00\xBA\x00\xC4\x00\xC3\x00\xD0\x00\xC4\x00\xCB\x00\xC3\x00\xC6\x00\xC8\x00\xCD\x00\xDE\x00\xAD\x00\xCB\x00\xD1\x00\xC9\x00\xC6\x00\xCB\x00\xBE\x00\xBF\x00\xD1\x00\xD3\x00\xC5\x00\xC9\x00\xC7\x00\xC7\x00\xC9\x00\xCE\x00\xC7\x00\xCC\x00\xCD\x00\xD0\x00\xC3\x00\xD9\x00\xBD\x00\xB3\x00\xCB\x00\xBE\x00\xC9\x00\xC5\x00\xC3\x00\xD2\x00\xCC\x00\xC7\x00\xC5\x00\xCF\x00\xC7\x00\xC9\x00\xC9\x00\xC1\x00\xCE\x00\xB6\x00\xCB\x00\xBE\x00\xCD\x00\xD7\x00\xC6\x00\xCC\x00\xD0\x00\xCD\x00\xC4\x00\xBF\x00\xCB\x00\xC4\x00\xC6\x00\xC9\x00\xCA\x00\xC8\x00\xD0\x00\xC5\x00\xCD\x00\xC8\x00\xE3\x00\xB3\x00\xCC\x00\xD2\x00\xB5\x00\xD1\x00\xC5\x00\xC3\x00\xC5\x00\xC8\x00\xD5\x00\xC8\x00\xCA\x00\xCE\x00\xC6\x00\xC3\x00\xC9\x00\xC9\x00\xCD\x00\xC4\x00\xB5\x00\xC1\x00\xCD\x00\xC7\x00\xCA\x00\xC0\x00\xD6\x00\xD3\x00\xBD\x00\xCE\x00\xC3\x00\xC5\x00\xC8\x00\xC9\x00\xCE\x00\xC8\x00\xC8\x00\xCB\x00\xCD\x00\xE4\x00\xC5\x00\xC6\x00\xC9\x00\xD0\x00\xCA\x00\xBF\x00\xBF\x00\xC7\x00\xCA\x00\xC6\x00\xC3\x00\xCD\x00\xC7\x00\xC5\x00\xC8\x00\xD0\x00\xC7\x00\xC7\x00\xCE\x00\xB3\x00\xC3\x00\xC5\x00\xC5\x00\xC4\x00\xD8\x00\xCE\x00\xCE\x00\xC4\x00\xD1\x00\xC8\x00\xD7\x00\xC3\x00\xC9\x00\xC1\x00\xC8\x00\xC7\x00\xC7\x00\xC6\x00\xD0\x00\xC6\x00\xC5\x00\xCA\x00\xCA\x00\xC1\x00\xB6\x00\xC2\x00\xD3\x00\xC1\x00\xCE\x00\xC6\x00\xC9\x00\xC0\x00\xCB\x00\xCB\x00\xCA\x00\xCB\x00\xCB\x00\xCA\x00\xD0\x00\xD3\x00\xC8\x00\xC6\x00\xBF\x00\xD3\x00\xCD\x00\xCE\x00\xCA\x00\xC7\x00\xC3\x00\xC2\x00\xCC\x00\xCC\x00\xC1\x00\xCE\x00\xCB\x00\xC5\x00\xCA\x00\xBF\x00\xCD\x00\xC8\x00\xC4\x00\xC8\x00\xC3\x00\xD0\x00\xD3\x00\xC2\x00\xC7\x00\xCA\x00\xC6\x00\xD3\x00\xCB\x00\xCB\x00\xCB\x00\xC5\x00\xC5\x00\xC6\x00\xCE\x00\xCB\x00\xCD\x00\xC0\x00\xCC\x00\xBD\x00\xC8\x00\xC1\x00\xCD\x00\xCC\x00\xC4\x00\xCB\x00\xBE\x00\xD2\x00\xCA\x00\xCC\x00\xC5\x00\xC3\x00\xC7\x00\xCB\x00\xC3\x00\xC9\x00\xCD\x00\xC2\x00\xD7\x00\xC4\x00\xBE\x00\xC9\x00\xC7\x00\xD0\x00\xC4\x00\xCC\x00\xCD\x00\xC0\x00\xCA\x00\xBF\x00\xC7\x00\xC5\x00\xCA\x00\xC9\x00\xC4\x00\xC5\x00\xCE\x00\xC3\x00\xB8\x00\xCF\x00\xCD\x00\xCF\x00\xBF\x00\xC9\x00\xCC\x00\xBF\x00\xC8\x00\xCE\x00\xCF\x00\xC9\x00\xC9\x00\xBF\x00\xCB\x00\xC6\x00\xC9\x00\xCB\x00\xCD\x00\xC9\x00\xB6\x00\xC9\x00\xBE\x00\xC9\x00\xC5\x00\xCA\x00\xC7\x00\xCB\x00\xC6\x00\xC2\x00\xC0\x00\xCB\x00\xC5\x00\xC8\x00\xC8\x00\xCC\x00\xC2\x00\xC6\x00\xCE\x00\xC0\x00\xCE\x00\xD5\x00\xC2\x00\xC5\x00\xC7\x00\xCD\x00\xC8\x00\xC9\x00\xC8\x00\xCE\x00\xC0\x00\xCC\x00\xC1\x00\xBF\x00\xC0\x00\xD1\x00\xC8\x00\xCC\x00\xD1\x00\xCC\x00\xD2\x00\xB5\x00\xC6\x00\xC7\x00\xC3\x00\xCE\x00\xC6\x00\xC5\x00\xC4\x00\xC9\x00\xCB\x00\xC9\x00\xCC\x00\xC9\x00\xCD\x00\xC6\x00\xC5\x00\xC6\x00\xD4\x00\xC9\x00\xC6\x00\xC2\x00\xCA\x00\xC1\x00\xC3\x00\xC9\x00\xC0\x00\xCD\x00\xD0\x00\xC7\x00\xCC\x00\xC1\x00\xC7\x00\xCC\x00\xD0\x00\xBC\x00\xCC\x00\xCA\x00\xCD\x00\xC8\x00\xCC\x00\xCD\x00\xBD\x00\xCD\x00\xD9\x00\xBA\x00\xCC\x00\xBD\x00\xBA\x00\xAD\x00\xCA\x00\xCB\x00\xC8\x00\xC5\x00\xC7\x00\xCC\x00\xC7\x00\xC4\x00\xCE"
@@ -54,7 +75,8 @@ draw_rect_final:
     MOV [j] , 0
     MOV [cpos_x] , 107
     MOV [cpos_y] , 107
-    MOV [diameter] , 40
+    MOV [rwidth] , 40
+    MOV [rheight] , 40
     MOV [mode] , 0
 	CALL draw_rect
 	RET
@@ -74,24 +96,15 @@ draw_circle_final:
 	RET
 ; -----------------------------------------------------------------------
 ; function display_output()
-; adjustment for frame of reference change 0 -> 30
+; adjustment for frame of reference change 0 -> 200
 ; -----------------------------------------------------------------------
 display_output:
-	MOV A , [BIAS]
-    ADD A , 200
-    MOV [BIAS] , A
-
 	MOV A , [output]
     DIV 10
     MOV [output] , A
     
     CMP A , [BIAS] ; A > BIAS --> RECTANGLE
-	JA test_complement_r
-    JNA output_circle
-    
-test_complement_r:
-	CMP A , 0xf800 ; A > -2040 two's complement
-    JA output_rectangle
+	JA output_rectangle
     JNA output_circle
 
 output_circle:
@@ -315,7 +328,6 @@ skip_circle_pixel:
     JMP draw_circle_segment
 draw_circle_segment_return:
 	RET
-
 ; -----------------------------------------------------------------------
 ; function draw_circle()
 ; -----------------------------------------------------------------------
@@ -356,14 +368,13 @@ draw_circle_loop:
 draw_circle_end_loop:
 	MOV [i] , 0
 	RET
-
 ; -----------------------------------------------------------------------
 ; function draw_line_segment()
 ; -----------------------------------------------------------------------
 draw_line_segment:
 	MOV A , [j]
 	CMP A , [rwidth]
-    JA draw_line_segment_return
+    JAE draw_line_segment_return
     
     MOV B , [pos_y]
     MOVB AH , BL
@@ -394,7 +405,6 @@ skip_line:
 draw_line_segment_return:
 	MOV [j] , 0
 	RET
-
 ; -----------------------------------------------------------------------
 ; function draw_rect()
 ; -----------------------------------------------------------------------
@@ -406,7 +416,7 @@ draw_rect:
 draw_rect_loop:
 	MOV A , [i]
 	CMP A , [rheight]
-    JA draw_rect_end_loop
+    JAE draw_rect_end_loop
     
     MOV A , [cpos_y]
     MOV [pos_x] , A
@@ -424,18 +434,18 @@ draw_rect_loop:
 draw_rect_end_loop:
 	MOV [i] , 0
 	RET
-    
 ; -----------------------------------------------------------------------
 ; function init()
 ; ----------------------------------------------------------------------- 
-; 
 init:
 	MOV A , [pos_x]
     MOV [cpos_x] , A
     MOV A , [pos_y]
     MOV [cpos_y] , A
     RET
-
+; -----------------------------------------------------------------------
+; function main()
+; ----------------------------------------------------------------------- 
 main:
 	MOV SP , 0x09FF
     CALL init
@@ -456,5 +466,6 @@ continue:
     MOV [input_index] , 0
     CALL draw_from_inputs
     CALL feed_forward
+    MOV A , [output]
 	HLT
 
