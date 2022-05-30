@@ -17,6 +17,12 @@ JMP main
 ; Inspired by:
 ;  - Alexey Kutepov (alias Tsoding) : https://github.com/tsoding/perceptron
 ;  - Veritasium video : https://www.youtube.com/watch?v=GVsUOuSjvcg
+;
+; More on this project : https://github.com/galtrapecar/systems-1
+; 
+; - Gal Trapečar
+; - gal.trapecar.com
+;
 ; -----------------------------------------------------------------------
 ; SCREEN SIZE: 255 x 255
 ; PERCEPTRON RESOLUTION: 20 x 20
